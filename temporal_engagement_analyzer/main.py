@@ -4,6 +4,7 @@ from .analyzer.file_scanner import FileScanner
 from .analyzer.slack_parser import SlackParser
 from .analyzer.aggregator import MetricsAggregator
 from .analyzer.time_aggregator import TimeAggregator
+from .analyzer.visualization import HeatmapVisualizer
 
 def main():
     parser = argparse.ArgumentParser(description="Slack Export Analyzer")
@@ -34,11 +35,12 @@ def main():
     results = time_aggregator.summary()
     for (day, hour), metrics in sorted(results.items()):
         print(f"{day} {hour:02d}:00")
-        print(f"  Messages: {metrics['message_count']}")
-        print(f"  Avg replies: {metrics['avg_replies']:.2f}")
-        print(f"  Avg reactions: {metrics['avg_reactions']:.2f}")
+        print(f"\tMessages: {metrics['message_count']}")
+        print(f"\tAvg replies: {metrics['avg_replies']:.2f}")
+        print(f"\tAvg reactions: {metrics['avg_reactions']:.2f}")
         print()
 
+    HeatmapVisualizer.plot(results, title="Average Reactions Heatmap")
 
 if __name__ == "__main__":
     main()

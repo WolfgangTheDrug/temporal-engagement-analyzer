@@ -4,13 +4,20 @@ version = "0.1.0"
 description = "Analyze community response to messages based on posting time"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "matplotlib>=3.10.8",
+    "pandas>=2.3.3",
+    "seaborn>=0.13.2",
+]
 
 [project.scripts]
 temporal-engagement = "temporal_engagement_analyzer.main:main"
 
 [tool.uv]
 package = true
+
+[tool.setuptools]
+packages = ["temporal_engagement_analyzer"]
 
 [dependency-groups]
 dev = [
