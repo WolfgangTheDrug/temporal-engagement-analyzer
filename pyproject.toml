@@ -8,3 +8,9 @@ dependencies = []
 
 [project.scripts]
 temporal-engagement = "main:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "ruff>=0.15.7",
+]
