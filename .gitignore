@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# code quality c hecks caches
+.ruff_cache
+.mypy_cache
