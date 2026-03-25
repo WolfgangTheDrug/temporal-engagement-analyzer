@@ -12,3 +12,9 @@ wheels/
 # code quality c hecks caches
 .ruff_cache
 .mypy_cache
+
+# data folder
+data
+
+# macOS Specific
+.DS_Store

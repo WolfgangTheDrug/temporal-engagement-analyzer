@@ -1,9 +1,8 @@
 import argparse
 
-from analyzer.file_scanner import FileScanner
-from analyzer.slack_parser import SlackParser
-from analyzer.aggregator import MetricsAggregator
-
+from .analyzer.file_scanner import FileScanner
+from .analyzer.slack_parser import SlackParser
+from .analyzer.aggregator import MetricsAggregator
 
 def main():
     parser = argparse.ArgumentParser(description="Slack Export Analyzer")
