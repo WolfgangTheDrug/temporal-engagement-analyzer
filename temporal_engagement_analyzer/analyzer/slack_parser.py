@@ -1,9 +1,14 @@
 import json
 from typing import List
+from datetime import datetime
 
 from .models import MessageMetrics
 
 class SlackParser:
+    @staticmethod
+    def _parse_ts(ts: str) -> datetime:
+        return datetime.fromtimestamp(float(ts))
+    
     @staticmethod
     def parse_file(file_path: str) -> List[MessageMetrics]:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -17,6 +22,7 @@ class SlackParser:
 
             metrics = MessageMetrics(
                 ts=msg.get("ts"),
+                datetime=SlackParser._parse_ts(msg.get("ts")),
                 reply_count=msg.get("reply_count", 0),
                 reply_user_count=msg.get("reply_user_count", 0),
                 reactions_count=SlackParser._count_reactions(msg),
