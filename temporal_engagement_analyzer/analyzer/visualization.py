@@ -1,79 +1,83 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from typing import Dict, Tuple
+
+SummaryKey = Tuple[str, int]
 
 
 class HeatmapVisualizer:
+    # Configuration for plots: (title, column, colormap)
+    PLOTS = [
+        ("Avg Replies", "avg_replies", "viridis"),
+        ("Avg Reactions", "avg_reactions", "viridis"),
+        ("Median Replies", "median_replies", "magma"),
+        ("Median Reactions", "median_reactions", "magma"),
+    ]
+
+    DAY_ORDER = [
+        "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday", "Sunday"
+    ]
+
+    HOURS = list(range(24))
+    MISSING_VALUE = -2  # keep your original behavior explicit
+
     @staticmethod
-    def plot(summary: dict, title: str = "Engagement Heatmaps"):
-        rows = []
-        for (day, hour), metrics in summary.items():
-            rows.append({
+    def _to_dataframe(summary: Dict[SummaryKey, dict]) -> pd.DataFrame:
+        rows = [
+            {
                 "day": day,
                 "hour": hour,
-                "avg_replies": metrics["avg_replies"],
-                "avg_reactions": metrics["avg_reactions"],
-                "median_replies": metrics["median_replies"],
-                "median_reactions": metrics["median_reactions"],
-            })
-
-        df = pd.DataFrame(rows)
-
-        # Full grid
-        day_order = [
-            "Monday", "Tuesday", "Wednesday",
-            "Thursday", "Friday", "Saturday", "Sunday"
+                **metrics
+            }
+            for (day, hour), metrics in summary.items()
         ]
-        full_hours = list(range(24))
+        return pd.DataFrame(rows)
 
-        # Pivot tables
-        pivot_replies = df.pivot(
-            index="day",
-            columns="hour",
-            values="avg_replies"
-        ).reindex(index=day_order, columns=full_hours).fillna(-2)
+    @classmethod
+    def _pivot(cls, df: pd.DataFrame, value: str) -> pd.DataFrame:
+        return (
+            df.pivot(index="day", columns="hour", values=value)
+            .reindex(index=cls.DAY_ORDER, columns=cls.HOURS)
+            .fillna(cls.MISSING_VALUE)
+        )
 
-        pivot_reactions = df.pivot(
-            index="day",
-            columns="hour",
-            values="avg_reactions"
-        ).reindex(index=day_order, columns=full_hours).fillna(-2)
+    @classmethod
+    def plot(
+        cls,
+        summary: Dict[SummaryKey, dict],
+        title: str = "Engagement Heatmaps"
+    ) -> Figure:
+        df = cls._to_dataframe(summary)
 
-        pivot_median_replies = df.pivot(
-            index="day",
-            columns="hour",
-            values="median_replies"
-        ).reindex(index=day_order, columns=full_hours).fillna(-2)
+        n_plots = len(cls.PLOTS)
+        n_cols = 2
+        n_rows = (n_plots + 1) // n_cols
 
-        pivot_median_reactions = df.pivot(
-            index="day",
-            columns="hour",
-            values="median_reactions"
-        ).reindex(index=day_order, columns=full_hours).fillna(-2)
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(18, 3 * n_rows))
+        axes = axes.flatten()  # normalize for easy iteration
 
-        # Create plots
-        fig, axes = plt.subplots(2, 2, figsize=(18, 6))
+        for ax, (plot_title, column, cmap) in zip(axes, cls.PLOTS):
+            pivot = cls._pivot(df, column)
 
-        # Avg Replies
-        sns.heatmap(pivot_replies, ax=axes[0, 0], cmap="viridis", linewidths=0.5)
-        axes[0, 0].set_title("Avg Replies")
+            sns.heatmap(
+                pivot,
+                ax=ax,
+                cmap=cmap,
+                linewidths=0.5
+            )
 
-        # Avg Reactions
-        sns.heatmap(pivot_reactions, ax=axes[0, 1], cmap="viridis", linewidths=0.5)
-        axes[0, 1].set_title("Avg Reactions")
-
-        # Median Replies
-        sns.heatmap(pivot_median_replies, ax=axes[1, 0], cmap="magma", linewidths=0.5)
-        axes[1, 0].set_title("Median Replies")
-
-        # Median Reactions
-        sns.heatmap(pivot_median_reactions, ax=axes[1, 1], cmap="magma", linewidths=0.5)
-        axes[1, 1].set_title("Median Reactions")
-        
-        for ax in axes.flat:
+            ax.set_title(plot_title)
             ax.set_xlabel("Hour of Day")
             ax.set_ylabel("Day of Week")
 
+        # Hide unused axes (if any)
+        for ax in axes[n_plots:]:
+            ax.set_visible(False)
+
         fig.suptitle(title)
         plt.tight_layout()
-        plt.show()
+
+        return fig

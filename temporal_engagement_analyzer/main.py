@@ -1,5 +1,7 @@
 import argparse
 
+from matplotlib import pyplot as plt
+
 from .analyzer.file_scanner import FileScanner
 from .analyzer.slack_parser import SlackParser
 from .analyzer.aggregator import MetricsAggregator
@@ -42,7 +44,8 @@ def main():
         print(f"\tMed reactions: {metrics['median_reactions']:.2f}")
         print()
 
-    HeatmapVisualizer.plot(results, title="Average Reactions Heatmap")
+    fig = HeatmapVisualizer.plot(results)
+    plt.show()
 
 if __name__ == "__main__":
     main()
