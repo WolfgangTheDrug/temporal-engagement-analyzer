@@ -38,6 +38,8 @@ def main():
         print(f"\tMessages: {metrics['message_count']}")
         print(f"\tAvg replies: {metrics['avg_replies']:.2f}")
         print(f"\tAvg reactions: {metrics['avg_reactions']:.2f}")
+        print(f"\tMed replies: {metrics['median_replies']:.2f}")
+        print(f"\tMed reactions: {metrics['median_reactions']:.2f}")
         print()
 
     HeatmapVisualizer.plot(results, title="Average Reactions Heatmap")
